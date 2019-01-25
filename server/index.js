@@ -13,22 +13,29 @@ const typeDefs = `
     hello(name: String): String!
   }
   type Todo {
+    id: ID!
     text: String!
-    complete: Boolean
+    complete: Boolean!
   }
   type Mutation {
     createTodo(text: String!) Todo
   }
-`
+`;
 
 const resolvers = {
   Query: {
-    hello: (_, { name }) => `Hello ${name || 'World'}`,
+    hello: (_, { name }) => `Hello ${name || 'World'}`
   },
+  Mutation: {
+    createTodo: async (_, { text }) => {
+        const todo = new Todo({ text, complete: false });
+        await todo.save();
+        return todo;
+    }
+  }
 }
 
-const server = new GraphQLServer({ typeDefs, resolvers })
-mongoose.connection.once('open', function() {
-    // we're connected!
+const server = new GraphQLServer({ typeDefs, resolvers });
+mongoose.connection.once("open", function() {
     server.start(() => console.log('Server is running on localhost:4000'));
   });
